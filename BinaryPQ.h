@@ -3,7 +3,7 @@
 #ifndef BINARYPQ_H
 #define BINARYPQ_H
 
-
+#include <utility>
 #include <algorithm>
 #include "Eecs281PQ.h"
 
@@ -18,7 +18,7 @@ public:
     // Runtime: O(1)
     explicit BinaryPQ(COMP_FUNCTOR comp = COMP_FUNCTOR()) :
         BaseClass{ comp } {
-        // TODO: Implement this function.
+
     } // BinaryPQ
 
 
@@ -27,9 +27,9 @@ public:
     // Runtime: O(n) where n is number of elements in range.
     // TODO: when you implement this function, uncomment the parameter names.
     template<typename InputIterator>
-    BinaryPQ(InputIterator /*start*/, InputIterator /*end*/, COMP_FUNCTOR comp = COMP_FUNCTOR()) :
-        BaseClass{ comp } {
-        // TODO: Implement this function.
+    BinaryPQ(InputIterator start, InputIterator end, COMP_FUNCTOR comp = COMP_FUNCTOR()) :
+        BaseClass{ comp }, data{start, end} {
+            updatePriorities();
     } // BinaryPQ
 
 
@@ -43,15 +43,19 @@ public:
     //              'rebuilds' the heap by fixing the heap invariant.
     // Runtime: O(n)
     virtual void updatePriorities() {
-        // TODO: Implement this function.
+        for(size_t i = data.size(); i != 0; --i) {
+            fix_down((unsigned long)get_element(i));
+        }
+        
     } // updatePriorities()
 
 
     // Description: Add a new element to the heap.
     // Runtime: O(log(n))
     // TODO: when you implement this function, uncomment the parameter names.
-    virtual void push(const TYPE &/*val*/) {
-        // TODO: Implement this function.
+    virtual void push(const TYPE &val) {
+        data.push_back(val);
+        fix_up(data.size());
     } // push()
 
 
@@ -62,7 +66,10 @@ public:
     // familiar with them, you do not need to use exceptions in this project.
     // Runtime: O(log(n))
     virtual void pop() {
-        // TODO: Implement this function.
+        std::swap(data[0], data.back());
+        data.pop_back();
+        fix_down((unsigned long)get_element(0));
+        // call fix_down
     } // pop()
 
 
@@ -72,29 +79,21 @@ public:
     //              might make it no longer be the most extreme element.
     // Runtime: O(1)
     virtual const TYPE &top() const {
-        // TODO: Implement this function.
-
-        // These lines are present only so that this provided file compiles.
-        static TYPE temp; // TODO: Delete this line
-        return temp;      // TODO: Delete or change this line
+        return data.front();
     } // top()
 
 
     // Description: Get the number of elements in the heap.
     // Runtime: O(1)
     virtual std::size_t size() const {
-        // TODO: Implement this function.  Might be very simple,
-        // depending on your implementation.
-        return 0; // TODO: Delete or change this line
+        return data.size();
     } // size()
 
 
     // Description: Return true if the heap is empty.
     // Runtime: O(1)
     virtual bool empty() const {
-        // TODO: Implement this function.  Might be very simple,
-        // depending on your implementation.
-        return true; // TODO: Delete or change this line
+        return data.empty();
     } // empty()
 
 
@@ -105,8 +104,28 @@ private:
     //       a "heapSize", since you can call your own size() member function,
     //       or check data.size().
 
-    // TODO: Add any additional member functions or data you require here.
-    //       For instance, you might add fixUp() and fixDown().
+    void fix_up(size_t k) {
+        while(k > 1 && this->compare(data[(unsigned long)get_element(k/2)], data[(unsigned long)get_element(k)])) {
+            std::swap(data[(unsigned long)get_element(k)], data[(unsigned long)get_element(k/2)]);
+            k /= 2;
+        }
+    }
+    void fix_down(size_t k) {
+        while(2 * k <= data.size()) {
+            size_t j = 2 * k;
+            if(j < data.size() && this->compare(data[(unsigned long)get_element(j)], data[(unsigned long)get_element(j+1)])) ++j;
+            if(!(this->compare(data[(unsigned long)get_element(k)], data[(unsigned long)get_element(j)]))) break;
+            std::swap(data[(unsigned long)get_element(k)], data[(unsigned long)get_element(j)]);
+            k = j;
+        }
+    }
+    // Translation of 0-based indexing to 1-based indexing
+    const TYPE &get_element(size_t i) const {
+        return data[i - 1];
+    }
+    TYPE &get_element(size_t i) {
+        return data[i - 1];
+    }
 }; // BinaryPQ
 
 
