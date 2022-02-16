@@ -43,36 +43,36 @@ struct IntPtrComp {
     }
 };
 
-
-// TODO: Make sure that you're using this-compare() properly, and everywhere
-// that you should.  Complete this function by adding a functor that compares
-// two HiddenData structures, create a PQ of the specified type, and call
-// this function from main().
 void testHiddenData(const string &pqType) {
     struct HiddenData {
         int data;
     };
     struct HiddenDataComp {
-        bool operator()(const HiddenData &/*a*/, const HiddenData &/*b*/) const {
-            // TODO: Finish this functor; when you do, uncomment the
-            // parameters in the line above
+        bool operator()(const HiddenData &a, const HiddenData &b) const {
+            if (a.data == b.data) return true;
             return false;
         }
     };
 
     cout << "Testing " << pqType << " with hidden data" << endl;
 
-    // TODO: Add code here to actually test with the HiddenData type.
+    HiddenData hidden1{2};
+    HiddenData hidden2{1};
+    Eecs281PQ<HiddenData *, HiddenDataComp> *pq = nullptr;
+    pq->push(&hidden1);
+    pq->push(&hidden2);
+
+    assert(pq->top() == &hidden1);
+    
 } // testHiddenData()
 
-
-// TODO: Add more code to this function to test if updatePriorities()
-// is working properly.
 void testUpdatePrioritiesHelper(Eecs281PQ<int *, IntPtrComp> *pq) {
     vector<int> data;
     data.reserve(100);
     data.push_back(1);
     data.push_back(5);
+    data.push_back(10);
+    data.push_back(7);
 
     // NOTE: If you add more data to the vector, don't push the pointers
     // until AFTER the vector stops changing size!  Think about why.
@@ -83,23 +83,33 @@ void testUpdatePrioritiesHelper(Eecs281PQ<int *, IntPtrComp> *pq) {
     } // for
 
     // Change the first value (which is pointed to by the pq), and check it.
-    data[0] = 10;
+    data[0] = 3;
     pq->updatePriorities();
     assert(*pq->top() == 10);
+    pq->pop();
+    assert(*pq->top() == 7);
+    pq->pop();
+    assert(*pq->top() == 5);
+    pq->pop();
+    assert(*pq->top() == 3);
+    pq->pop();
+    assert(pq->empty());
+    std::cout << "Update priorities test complete.\n";
 } // testUpdatePrioritiesHelper()
 
-
-// TODO: Add more code to this function to test if updatePriorities()
-// is working properly.
 void testUpdatePriorities(const string &pqType) {
     Eecs281PQ<int *, IntPtrComp> *pq = nullptr;
     cout << "Testing updatePriorities() on " << pqType << endl;
 
     if (pqType == "Unordered") {
         pq = new UnorderedPQ<int *, IntPtrComp>;
-    } // if
-    // TODO: Add more types here inside 'else if' statements, like in main().
-
+    } else if(pqType == "Sorted") {
+        pq = new SortedPQ<int *, IntPtrComp>;
+    } else if(pqType == "Binary") {
+        pq = new BinaryPQ<int *, IntPtrComp>;
+    } else {
+        pq = new PairingPQ<int *, IntPtrComp>;
+    }
     if (!pq) {
         cout << "Invalid pq pointer; did you forget to create it?" << endl;
         return;
