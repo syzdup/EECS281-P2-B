@@ -44,7 +44,7 @@ public:
     // Runtime: O(n)
     virtual void updatePriorities() {
         for(size_t i = data.size(); i != 0; --i) {
-            fix_down((unsigned long)get_element(i));
+            fix_down(i);
         }
         
     } // updatePriorities()
@@ -68,7 +68,7 @@ public:
     virtual void pop() {
         std::swap(data[0], data.back());
         data.pop_back();
-        fix_down((unsigned long)get_element(0));
+        fix_down(1);
         // call fix_down
     } // pop()
 
@@ -105,17 +105,17 @@ private:
     //       or check data.size().
 
     void fix_up(size_t k) {
-        while(k > 1 && this->compare(data[(unsigned long)get_element(k/2)], data[(unsigned long)get_element(k)])) {
-            std::swap(data[(unsigned long)get_element(k)], data[(unsigned long)get_element(k/2)]);
+        while(k > 1 && this->compare(get_element(k/2), get_element(k))) {
+            std::swap(get_element(k), get_element(k/2));
             k /= 2;
         }
     }
     void fix_down(size_t k) {
         while(2 * k <= data.size()) {
             size_t j = 2 * k;
-            if(j < data.size() && this->compare(data[(unsigned long)get_element(j)], data[(unsigned long)get_element(j+1)])) ++j;
-            if(!(this->compare(data[(unsigned long)get_element(k)], data[(unsigned long)get_element(j)]))) break;
-            std::swap(data[(unsigned long)get_element(k)], data[(unsigned long)get_element(j)]);
+            if(j < data.size() && this->compare(get_element(j), get_element(j+1))) ++j;
+            if(!(this->compare(get_element(k), get_element(j)))) break;
+            std::swap(get_element(k), get_element(j));
             k = j;
         }
     }

@@ -34,7 +34,7 @@ public:
     SortedPQ(InputIterator start, InputIterator end, COMP_FUNCTOR comp = COMP_FUNCTOR()) :
         BaseClass{ comp }, data{start, end} {
             // O(n) + O(n logn) = O(n logn) will the constant factor be too much?
-            sort(data.first(), data.end(), this->compare);
+            sort(data.begin(), data.end(), this->compare);
     } // SortedPQ
 
 
