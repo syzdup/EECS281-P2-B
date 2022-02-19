@@ -20,7 +20,7 @@ public:
             // TODO: After you add add one extra pointer (see below), be sure to
             // initialize it here.
             explicit Node(const TYPE &val)
-                : elt{ val }, child{ nullptr }, sibling{ nullptr }
+                : elt{ val }, child{ nullptr }, sibling{ nullptr }, parent{ nullptr }
             {}
 
             // Description: Allows access to the element at that Node's position.
@@ -39,15 +39,15 @@ public:
             TYPE elt;
             Node *child;
             Node *sibling;
-            // TODO: Add one extra pointer (parent or previous) as desired.
+            Node *parent;
     }; // Node
 
 
     // Description: Construct an empty pairing heap with an optional comparison functor.
     // Runtime: O(1)
     explicit PairingPQ(COMP_FUNCTOR comp = COMP_FUNCTOR()) :
-        BaseClass{ comp } {
-        // TODO: Implement this function.
+        BaseClass{ comp }, count{ 0 } {
+
     } // PairingPQ()
 
 
@@ -65,7 +65,7 @@ public:
     // Description: Copy constructor.
     // Runtime: O(n)
     PairingPQ(const PairingPQ &other) :
-        BaseClass{ other.compare } {
+        BaseClass{ other.compare }, count{ other.count } {
         // TODO: Implement this function.
         // NOTE: The structure does not have to be identical to the original,
         //       but it must still be a valid Pairing Heap.
@@ -114,7 +114,24 @@ public:
     // familiar with them, you do not need to use exceptions in this project.
     // Runtime: Amortized O(log(n))
     virtual void pop() {
-        // TODO: Implement this function.
+        std::deque<Node*> node_dq;
+        Node * temp = root->child;
+        // If only a root element exists
+        if(temp == nullptr) {
+            delete root;
+        // Child of root has no siblings, then the child becomes new root
+        } else if(temp->sibling == nullptr) {
+            delete root;
+            root = temp;
+        // Child of root has at least one sibling
+        } else {
+            while(temp->sibling != nullptr) {
+                node_dq.push_back(temp);
+            }
+            while(node_dq.size() > 1) {
+
+            }
+        }
     } // pop()
 
 
@@ -124,26 +141,21 @@ public:
     //              might make it no longer be the most extreme element.
     // Runtime: O(1)
     virtual const TYPE &top() const {
-        // TODO: Implement this function
-
-        // These lines are present only so that this provided file compiles.
-        static TYPE temp; // TODO: Delete this line
-        return temp;      // TODO: Delete or change this line
+        return root->elt;
     } // top()
 
 
     // Description: Get the number of elements in the pairing heap.
     // Runtime: O(1)
     virtual std::size_t size() const {
-        // TODO: Implement this function
-        return 0; // TODO: Delete or change this line
+        return count;
     } // size()
 
     // Description: Return true if the pairing heap is empty.
     // Runtime: O(1)
     virtual bool empty() const {
-        // TODO: Implement this function
-        return true; // TODO: Delete or change this line
+        if (count == 0) return true;
+        return false;
     } // empty()
 
 
@@ -169,11 +181,22 @@ public:
     //       never move or copy/delete that node in the future, until it is eliminated
     //       by the user calling pop().  Remember this when you implement updateElt() and
     //       updatePriorities().
-    Node* addNode(const TYPE &/*val*/) {
-        // TODO: Implement this function
-        return nullptr; // TODO: Delete or change this line
+    Node* addNode(const TYPE &val) {
+        // check for proper use of parent/previous
+        Node * new_node = new Node{val};
+        if(count == 0) {
+            root = new_node;
+            count += 1;
+            return root;
+        } else {
+            Node * temp = meld(root, new_node);
+            if(root->parent != nullptr) {
+                root = temp;
+            }
+            count += 1;
+            return temp;
+        }
     } // addNode()
-
 
 private:
     // TODO: Add any additional member variables or member functions you require here.
@@ -182,6 +205,38 @@ private:
     // NOTE: For member variables, you are only allowed to add a "root pointer"
     //       and a "count" of the number of nodes.  Anything else (such as a deque)
     //       should be declared inside of member functions as needed.
+    Node * root;
+    size_t count;
+    // meld(node * a, node * b) 
+    // return pointer to bigger tree
+    // use this->compare(ptrA->elt, ptrB->elt)
+    Node * meld(Node * node_a, Node * node_b) {
+        // make sure that noda_a and node_b have no previous/parent and no sibling
+        if(node_a->parent != nullptr || node_b->parent != nullptr || node_a->sibling != nullptr || node_b->sibling != nullptr) {
+            std::cerr << "Meld can't take a node with a parent or sibling pointer.\n";
+            exit(1);
+        }
+        if(this->compare(node_a->elt, node_b->elt)) {
+            node_a->parent = node_b;
+            node_b->child = node_a;
+            return node_b;
+        } else {
+            // There is a root node with a child
+            if(node_a->child != nullptr) {
+                Node * temp = node_a->child;
+                while(temp->sibling != nullptr) {
+                    temp = temp->sibling;
+                }
+                temp->sibling = node_b;
+                node_b->parent = temp->parent;
+                return node_a;
+            } else {
+                node_a->child = node_b;
+                node_b->parent = node_a;
+                return node_a;
+            }
+        }
+    }
 };
 
 
