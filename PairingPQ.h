@@ -46,7 +46,7 @@ public:
     // Description: Construct an empty pairing heap with an optional comparison functor.
     // Runtime: O(1)
     explicit PairingPQ(COMP_FUNCTOR comp = COMP_FUNCTOR()) :
-        BaseClass{ comp }, count{ 0 }, root{ nullptr } {
+        BaseClass{ comp }, root{ nullptr }, count{ 0 } {
 
     } // PairingPQ()
 
@@ -68,7 +68,7 @@ public:
     // Description: Copy constructor.
     // Runtime: O(n)
     PairingPQ(const PairingPQ &other) :
-        BaseClass{ other.compare }, count{ other.count } {
+        BaseClass{ other.compare } {
             std::deque<Node*> node_dq;
             Node * temp = other.root;
             node_dq.push_back(temp);
@@ -315,10 +315,6 @@ private:
     // use this->compare(ptrA->elt, ptrB->elt)
     Node * meld(Node * node_a, Node * node_b) {
         // make sure that noda_a and node_b have no previous/parent and no sibling
-        // if(node_a->parent != nullptr || node_b->parent != nullptr || node_a->sibling != nullptr || node_b->sibling != nullptr) {
-        //     std::cerr << "Meld can't take a node with a parent or sibling pointer.\n";
-        //     exit(1);
-        // }
         if(node_a == node_b) {
             return node_a;
         }
