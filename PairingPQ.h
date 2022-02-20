@@ -46,7 +46,7 @@ public:
     // Description: Construct an empty pairing heap with an optional comparison functor.
     // Runtime: O(1)
     explicit PairingPQ(COMP_FUNCTOR comp = COMP_FUNCTOR()) :
-        BaseClass{ comp }, count{ 0 } {
+        BaseClass{ comp }, count{ 0 }, root{ nullptr } {
 
     } // PairingPQ()
 
@@ -102,19 +102,21 @@ public:
     // Description: Destructor
     // Runtime: O(n)
     ~PairingPQ() {
-        std::deque<Node*> node_dq;
-        Node * temp = root;
-        node_dq.push_back(temp);
-        while(!node_dq.empty()) {
-            temp = node_dq.front();
-            if(temp->child != nullptr) {
-                node_dq.push_back(temp->child);
+        if(count != 0) {
+            std::deque<Node*> node_dq;
+            Node * temp = root;
+            node_dq.push_back(temp);
+            while(!node_dq.empty()) {
+                temp = node_dq.front();
+                if(temp->child != nullptr) {
+                    node_dq.push_back(temp->child);
+                }
+                if(temp->sibling != nullptr) {
+                    node_dq.push_back(temp->sibling);
+                }
+                delete node_dq.front();
+                node_dq.pop_front();
             }
-            if(temp->sibling != nullptr) {
-                node_dq.push_back(temp->sibling);
-            }
-            delete node_dq.front();
-            node_dq.pop_front();
         }
     } // ~PairingPQ()
 
@@ -178,6 +180,7 @@ public:
                 node_dq.push_back(temp);
                 temp = temp->sibling;
             }
+            node_dq.push_back(temp);
             while(node_dq.size() > 1) {
                 // Get two nodes
                 meld_node_a = node_dq.front();
@@ -312,9 +315,12 @@ private:
     // use this->compare(ptrA->elt, ptrB->elt)
     Node * meld(Node * node_a, Node * node_b) {
         // make sure that noda_a and node_b have no previous/parent and no sibling
-        if(node_a->parent != nullptr || node_b->parent != nullptr || node_a->sibling != nullptr || node_b->sibling != nullptr) {
-            std::cerr << "Meld can't take a node with a parent or sibling pointer.\n";
-            exit(1);
+        // if(node_a->parent != nullptr || node_b->parent != nullptr || node_a->sibling != nullptr || node_b->sibling != nullptr) {
+        //     std::cerr << "Meld can't take a node with a parent or sibling pointer.\n";
+        //     exit(1);
+        // }
+        if(node_a == node_b) {
+            return node_a;
         }
         if(this->compare(node_a->elt, node_b->elt)) {
             node_a->parent = node_b;
