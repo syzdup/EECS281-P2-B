@@ -139,6 +139,12 @@ void testPriorityQueue(Eecs281PQ<int> *pq, const string &pqType) {
     assert(pq->empty());
 
     // TODO: Add more testing here!
+    pq->push(6);
+    pq->push(5);
+    pq->push(4);
+    pq->push(3);
+    pq->pop();
+    assert(pq->top() == 5);
 
     cout << "testPriorityQueue() succeeded!" << endl;
 } // testPriorityQueue()

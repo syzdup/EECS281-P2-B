@@ -56,9 +56,12 @@ public:
     // Runtime: O(n) where n is number of elements in range.
     // TODO: when you implement this function, uncomment the parameter names.
     template<typename InputIterator>
-    PairingPQ(InputIterator /*start*/, InputIterator /*end*/, COMP_FUNCTOR comp = COMP_FUNCTOR()) :
-        BaseClass{ comp } {
-        // TODO: Implement this function.
+    PairingPQ(InputIterator start, InputIterator end, COMP_FUNCTOR comp = COMP_FUNCTOR()) :
+        BaseClass{ comp }, count{ 0 } {
+            while(start != end) {
+                push(*start);
+                ++start;
+            }
     } // PairingPQ()
 
 
@@ -66,18 +69,32 @@ public:
     // Runtime: O(n)
     PairingPQ(const PairingPQ &other) :
         BaseClass{ other.compare }, count{ other.count } {
-        // TODO: Implement this function.
-        // NOTE: The structure does not have to be identical to the original,
-        //       but it must still be a valid Pairing Heap.
+            std::deque<Node*> node_dq;
+            Node * temp = other.root;
+            node_dq.push_back(temp);
+            while(!node_dq.empty()) {
+                temp = node_dq.front();
+                if(temp->child != nullptr) {
+                    node_dq.push_back(temp->child);
+                }
+                if(temp->sibling != nullptr) {
+                    node_dq.push_back(temp->sibling);
+                }
+                this->push(temp->elt);
+                node_dq.pop_front();
+            }
     } // PairingPQ()
 
 
     // Description: Copy assignment operator.
     // Runtime: O(n)
     // TODO: when you implement this function, uncomment the parameter names.
-    PairingPQ &operator=(const PairingPQ &/*rhs*/) {
-        // TODO: Implement this function.
-        // HINT: Use the copy-swap method from the "Arrays and Containers" lecture.
+    PairingPQ &operator=(const PairingPQ &rhs) {
+        PairingPQ temp(rhs);
+
+        std::swap(count, temp.count);
+        std::swap(root, temp.root);
+
         return *this;
     } // operator=()
 
@@ -85,7 +102,20 @@ public:
     // Description: Destructor
     // Runtime: O(n)
     ~PairingPQ() {
-        // TODO: Implement this function.
+        std::deque<Node*> node_dq;
+        Node * temp = root;
+        node_dq.push_back(temp);
+        while(!node_dq.empty()) {
+            temp = node_dq.front();
+            if(temp->child != nullptr) {
+                node_dq.push_back(temp->child);
+            }
+            if(temp->sibling != nullptr) {
+                node_dq.push_back(temp->sibling);
+            }
+            delete node_dq.front();
+            node_dq.pop_front();
+        }
     } // ~PairingPQ()
 
 
@@ -94,7 +124,23 @@ public:
     //              You CANNOT delete 'old' nodes and create new ones!
     // Runtime: O(n)
     virtual void updatePriorities() {
-        // TODO: Implement this function.
+        std::deque<Node*> node_dq;
+        Node * temp = root;
+        node_dq.push_back(temp);
+        while(!node_dq.empty()) {
+            temp = node_dq.front();
+            node_dq.pop_front();
+            if(temp->child != nullptr) {
+                node_dq.push_back(temp->child);
+            }
+            if(temp->sibling != nullptr) {
+                node_dq.push_back(temp->sibling);
+            }
+            temp->child = nullptr;
+            temp->parent = nullptr;
+            temp->sibling = nullptr;
+            root = meld(root, temp);
+        }
     } // updatePriorities()
 
 
@@ -125,13 +171,33 @@ public:
             root = temp;
         // Child of root has at least one sibling
         } else {
+            Node * meld_node_a;
+            Node * meld_node_b;
+            Node * melded_node;
             while(temp->sibling != nullptr) {
                 node_dq.push_back(temp);
+                temp = temp->sibling;
             }
             while(node_dq.size() > 1) {
-
+                // Get two nodes
+                meld_node_a = node_dq.front();
+                node_dq.pop_front();
+                meld_node_b = node_dq.front();
+                node_dq.pop_front();
+                // Break parent/sibling relationships
+                meld_node_a->parent = nullptr;
+                meld_node_a->sibling = nullptr;
+                meld_node_b->parent = nullptr;
+                meld_node_b->sibling = nullptr;
+                // Meld and push
+                melded_node = meld(meld_node_a, meld_node_b);
+                node_dq.push_back(melded_node);
             }
+            delete root;
+            root = node_dq.front();
+            node_dq.pop_front();
         }
+        count = count - 1;
     } // pop()
 
 
@@ -168,8 +234,42 @@ public:
     //
     // Runtime: As discussed in reading material.
     // TODO: when you implement this function, uncomment the parameter names.
-    void updateElt(Node* /*node*/, const TYPE &/*new_value*/) {
-        // TODO: Implement this function
+    void updateElt(Node* node, const TYPE &new_value) {
+        node->elt = new_value;
+        Node * temp = node->parent;
+        // Leftmost changed
+        if(temp->child == node) {
+            // Has a sibling
+            if(node->sibling) {
+                node->parent = nullptr;
+                node->sibling = nullptr;
+                root->child = node->sibling;
+            // Has no siblings
+            } else {
+                node->parent = nullptr;
+                node->sibling = nullptr;
+            }
+        // Otherwise
+        } else {
+            // Middle of sibling chain
+            if(node->sibling) {
+                temp = temp->child;
+                while(temp->sibling != node) {
+                    temp = temp->sibling;
+                }
+                temp->sibling = node->sibling;
+                node->parent = nullptr;
+                node->sibling = nullptr;
+            // End of sibling chain
+            } else {
+                temp = temp->child;
+                while(temp->sibling != node) {
+                    temp = temp->sibling;
+                }
+                temp->sibling = nullptr;
+            }
+        }
+        root = meld(root, node);
     } // updateElt()
 
 
