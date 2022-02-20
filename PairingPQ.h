@@ -68,7 +68,7 @@ public:
     // Description: Copy constructor.
     // Runtime: O(n)
     PairingPQ(const PairingPQ &other) :
-        BaseClass{ other.compare } {
+        BaseClass{ other.compare }, count{ 0 } {
             std::deque<Node*> node_dq;
             Node * temp = other.root;
             node_dq.push_back(temp);
@@ -119,7 +119,6 @@ public:
             }
         }
     } // ~PairingPQ()
-
 
     // Description: Assumes that all elements inside the pairing heap are out of order and
     //              'rebuilds' the pairing heap by fixing the pairing heap invariant.
@@ -297,7 +296,8 @@ public:
                 root = temp;
             }
             count += 1;
-            return temp;
+            // change return to new node
+            return new_node;
         }
     } // addNode()
 

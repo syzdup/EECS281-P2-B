@@ -149,6 +149,73 @@ void testPriorityQueue(Eecs281PQ<int> *pq, const string &pqType) {
     cout << "testPriorityQueue() succeeded!" << endl;
 } // testPriorityQueue()
 
+// Test updating elements and updating priorities
+void test_update_pairing() {
+    cout << "Testing update pairing" << endl;
+    PairingPQ<int*, IntPtrComp> * pq1 = new PairingPQ<int*, IntPtrComp>;
+
+    vector<int> vec;
+    vec.push_back(56);
+    vec.push_back(33);
+    vec.push_back(97);
+    vec.push_back(2);
+    vec.push_back(100);
+
+    for(size_t i = 0; i < vec.size(); ++i) {
+        pq1->push(&vec[i]);
+    }
+
+    assert(*(pq1->top()) == 100);
+
+    vec[4] = 96;
+    pq1->updatePriorities();
+
+    assert(*(pq1->top()) == 97);
+    pq1->pop();
+    assert(*(pq1->top()) == 96);
+
+    vec.push_back(1);
+    auto * new_node = pq1->addNode(&vec[5]);
+    vec.push_back(100);
+    pq1->updateElt(new_node, &vec[6]);
+    assert(*(pq1->top()) == 100);
+
+    // make a big update_pri test here 
+    PairingPQ<int*, IntPtrComp> * pq2 = new PairingPQ<int*, IntPtrComp>; 
+    vector<int> vec2;
+    vec2.push_back(7);
+    vec2.push_back(3);
+    vec2.push_back(8);
+    vec2.push_back(55);
+    vec2.push_back(2);
+
+    for(size_t i = 0; i < vec2.size(); ++i) {
+        pq2->push(&vec2[i]);
+    }
+    assert(*(pq2->top()) == 55);
+
+    // change values and update
+    vec2[0] = 56;
+    vec2[1] = 33;
+    vec2[2] = 2;
+    vec2[3] = 1;
+
+    pq2->updatePriorities();
+
+    assert(*(pq2->top()) == 56);
+    pq2->pop();
+    assert(*(pq2->top()) == 33);
+    pq2->pop();
+    assert(*(pq2->top()) == 2);
+    pq2->pop();
+    assert(*(pq2->top()) == 2);
+    pq2->pop();
+    assert(*(pq2->top()) == 1);
+    pq2->pop();
+    assert(pq2->empty() == true);
+
+    cout << "Testing update pairing succeeded." << endl;
+}
 
 // Test the pairing heap's range-based constructor, copy constructor,
 // and operator=().
@@ -171,7 +238,17 @@ void testPairing(vector<int> & vec) {
     assert(pq2->top() == pq3->top());
 
     cout << "Basic tests done." << endl;
-    // TODO: Add more code to test addNode(), updateElt(), etc.
+
+    pq1->push(0);
+    pq1->push(8);
+    pq1->push(7);
+    pq1->push(4);
+    assert(pq1->top() == 8);
+    pq1->pop();
+    assert(pq1->top() == 7);
+    pq1->updatePriorities();
+    pq1->pop();
+    assert(pq1->top() == 4);
 
     cout << "Calling destructors" << endl;
     delete pq1;
@@ -179,6 +256,8 @@ void testPairing(vector<int> & vec) {
     delete pq3;
 
     cout << "testPairing() succeeded" << endl;
+    
+    test_update_pairing();
 } // testPairing()
 
 
