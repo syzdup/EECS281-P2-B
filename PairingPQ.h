@@ -291,12 +291,8 @@ public:
             count += 1;
             return root;
         } else {
-            Node * temp = meld(root, new_node);
-            if(root->parent != nullptr) {
-                root = temp;
-            }
+            root = meld(root, new_node);
             count += 1;
-            // change return to new node
             return new_node;
         }
     } // addNode()
@@ -318,25 +314,17 @@ private:
         if(node_a == node_b) {
             return node_a;
         }
+        // check if either are nullptrs? return not nullptr
         if(this->compare(node_a->elt, node_b->elt)) {
             node_a->parent = node_b;
+            node_a->sibling = node_b->child;
             node_b->child = node_a;
             return node_b;
         } else {
-            // There is a root node with a child
-            if(node_a->child != nullptr) {
-                Node * temp = node_a->child;
-                while(temp->sibling != nullptr) {
-                    temp = temp->sibling;
-                }
-                temp->sibling = node_b;
-                node_b->parent = temp->parent;
-                return node_a;
-            } else {
-                node_a->child = node_b;
-                node_b->parent = node_a;
-                return node_a;
-            }
+            node_b->sibling = node_a->child;
+            node_a->child = node_b;
+            node_b->parent = node_a;
+            return node_a;
         }
     }
 };
