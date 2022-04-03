@@ -238,18 +238,23 @@ public:
     // TODO: when you implement this function, uncomment the parameter names.
     void updateElt(Node* node, const TYPE &new_value) {
         node->elt = new_value;
+        // If root, exit
+        if(node == root) {
+            return;
+        }
         Node * temp = node->parent;
         // Leftmost changed
         if(temp->child == node) {
             // Has a sibling
             if(node->sibling) {
+                root->child = node->sibling;
+                node->sibling->parent = root;
                 node->parent = nullptr;
                 node->sibling = nullptr;
-                root->child = node->sibling;
             // Has no siblings
             } else {
                 node->parent = nullptr;
-                node->sibling = nullptr;
+                root->child = nullptr;
             }
         // Otherwise
         } else {
@@ -269,6 +274,7 @@ public:
                     temp = temp->sibling;
                 }
                 temp->sibling = nullptr;
+                node->parent = nullptr;
             }
         }
         root = meld(root, node);
